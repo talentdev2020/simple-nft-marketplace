@@ -1,6 +1,5 @@
 import { useWeb3React } from "@web3-react/core";
 import { Contract } from "@ethersproject/contracts";
-import { parseEther } from "@ethersproject/units";
 import { makeStyles } from "@material-ui/core/styles";
 import Button from '@material-ui/core/Button';
  import { NFTAddress } from "../consts/contractAddress";
@@ -37,11 +36,9 @@ const useStyles = makeStyles(theme => ({
 const nfts = [
   {
     silverImage: 'ipfs/QmPJyzoPYgx3uAfhi48HhqX7qYvj6NaXQoDbo5x1aD9v2w/silverCrown.jpg',
-    upgradePrice: 1
   },
   {
     silverImage: 'ipfs/QmPJyzoPYgx3uAfhi48HhqX7qYvj6NaXQoDbo5x1aD9v2w/silverShield.jpeg',
-    upgradePrice: 2
   },
 
 ]
@@ -53,7 +50,8 @@ const Mint = () => {
   const onMint = async (nft: any) => {
     const tokenInstance = new Contract(NFTAddress, ABI, library.getSigner());
     try {
-      await tokenInstance.mintNFT(nft.silverImage, nft.upgradePrice);
+      const response = await tokenInstance.mintNFT(nft.silverImage);
+      await response.wait();
       alert("Successfully minted");
     } catch(err) {
       alert("Something went wrong");

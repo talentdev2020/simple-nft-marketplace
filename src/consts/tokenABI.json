@@ -1,5 +1,5 @@
 [
-  "function mintNFT(string,uint256) public payable",
+  "function mintNFT(string) public payable",
   "function updateTokenURI(uint256, string) public payable",
   "function balanceOf(address) public view returns (uint256)",
   "function tokenURI(uint256) public view returns(string memory)"

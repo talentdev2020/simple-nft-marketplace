@@ -3,7 +3,6 @@ import { makeStyles } from "@material-ui/core/styles";
 import { useWeb3React } from "@web3-react/core";
 import { formatEther } from "@ethersproject/units";
 import { injectedConnector } from "../connectors";
-import { Contract } from "@ethersproject/contracts";
 import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { useAppDispatch } from '../app/hooks';
@@ -11,9 +10,6 @@ import { fixedBalance } from "../utils/format"
 import {
     setEthBalance
 } from '../slices/walletSlice';
-import { NFTAddress } from "../consts/contractAddress";
-
-import ABI from "../consts/tokenABI.json"  ;
 declare global {
     interface Window { ethereum: any; }
 }

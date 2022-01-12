@@ -20,7 +20,7 @@ const useStyles = makeStyles(theme => ({
     width: "400px"
   },
   inputAmount: {
-    width: "400px",
+    width: "40px",
     marginBottom: "5px"
   },
   button: {
@@ -31,19 +31,21 @@ const useStyles = makeStyles(theme => ({
     margin: '0 10px'
   },
   image: {
-    width: "120px"
+    width: "120px",
+    height: "120px"
   }
 }));
 
 interface INFT {
   image: string,
   tokenId: number,
-  upgradePrice: number
 }
 const MyNFTs = () => {
   const classes = useStyles();
   const { account, library } = useWeb3React();
   const [nfts, setNfts] = useState<INFT[]>([]);
+  const [prices, setPrices] = useState<number[]>([]);
+
   const init = async() => {
     if (!library) return;
 
@@ -53,24 +55,19 @@ const MyNFTs = () => {
     const tmp = [];
     for (let i = 1; i <= count; i ++) {
       const uri = await tokenInstance.tokenURI(i);
-      let price = 0;
-      if (uri === 'ipfs/QmPJyzoPYgx3uAfhi48HhqX7qYvj6NaXQoDbo5x1aD9v2w/silverCrown.jpg') {
-        price = 1;
-      } else if (uri ==='ipfs/QmPJyzoPYgx3uAfhi48HhqX7qYvj6NaXQoDbo5x1aD9v2w/silverShield.jpeg') {
-        price = 2;
-      }
+      
       tmp.push({
         image: uri,
         tokenId: i,
-        upgradePrice: price
       });
     }
-    console.log(tmp)
+
     setNfts(tmp);
   }
 
   useEffect(() => {
     init();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   },[account])
 
   const onUpdate = async(nft: INFT) => {
@@ -78,27 +75,29 @@ const MyNFTs = () => {
       alert("You should mint first");
       return;
     }
-    if (nft.upgradePrice ===0) {
-      alert("already upgraded");
-      return;
-    }
 
     const tokenInstance = new Contract(NFTAddress, ABI, library.getSigner());
     const ethBalance = await library.getBalance(account);
-    if (parseFloat(formatEther(ethBalance)) < nft.upgradePrice) {
+    if (parseFloat(formatEther(ethBalance)) < prices[nft.tokenId]) {
       alert("Not insufficient balance");
       return;
     }
     try {
-      const response = await tokenInstance.updateTokenURI(nft.tokenId, nft.image.replace("silver", "gold"), {value: parseEther(nft.upgradePrice.toString())});
+      const response = await tokenInstance.updateTokenURI(nft.tokenId, nft.image.replace("silver", "gold"), {value: parseEther(prices[nft.tokenId].toString())});
       await response.wait();
-      console.log({response})
+
       alert("Successfully upgraded");
       await init();
     } catch(err) {
       alert("Something went wrong");
     }
     
+  }
+
+  const onChangeValue = (e: any, tokenId: number) => {
+    const value = e.target.value;
+    prices[tokenId] = value;
+    setPrices(prices.slice());
   }
 
   return (
@@ -108,7 +107,10 @@ const MyNFTs = () => {
             return (
               <div key={nft.tokenId} className={classes.grid}>
                 <img src={`https://ipfs.io/${nft.image}`} alt='silverIamge' className={classes.image}/>
-                <span>Upgradable Price: {nft.upgradePrice} Eth </span>
+                <br />
+                <div>
+                  <input type="text" onChange={(e) => onChangeValue(e, nft.tokenId)} className={classes.inputAmount} /> <span>Eth</span>
+                </div>
                 <Button disabled={!account} variant="contained" color="primary" className={classes.button} onClick={ () => onUpdate(nft)} >
                  Upgrade
                 </Button>  
